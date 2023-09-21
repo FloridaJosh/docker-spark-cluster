@@ -1,0 +1,9 @@
+{
+    "NotebookApp": {
+        "allow_root": true,
+        "token": ""
+    },
+    "IdentityProvider": {
+        "token": ""
+    }
+}

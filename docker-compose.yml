@@ -47,10 +47,57 @@ services:
     volumes:
         - ./apps:/opt/spark-apps
         - ./data:/opt/spark-data
-  demo-database:
-    image: postgres:11.7-alpine
-    ports: 
-      - "5432:5432"
-    environment: 
-      - POSTGRES_PASSWORD=casa1234
+#  demo-database:
+#    image: postgres:11.7-alpine
+#    ports: 
+#      - "5432:5432"
+#    environment: 
+#      - POSTGRES_PASSWORD=casa1234
+  
+  jupyterlab:
+    build:
+      context: jupyter_docker
+      dockerfile: ./Dockerfile
+    container_name: jupyter-pyspark-notebook
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+    ports:
+      - 8888:8888
+      - 4040:4040
+    command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''"
+    depends_on:
+      - spark-master
+    volumes:
+      - ./data:/home/jovyan/work
+  
+  sambaserver:
+    build:
+      context: samba_docker
+      dockerfile: ./Dockerfile
+    container_name: samba-server-docker
+    ports:
+      - 135:135/tcp
+      - 137:137/udp
+      - 138:138/udp
+      - 139:139/tcp
+      - 445:445/tcp
+    volumes:
+      - ./lan_share/:/shared
 
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=S3cret
+      - POSTGRES_USER=josh
+      - POSTGRES_DB=jrp_test
+  
+  cloudbeaver:
+    image: dbeaver/cloudbeaver
+    ports:
+      - 8978:8978
+    volumes:
+      - ./cloudbeaver_data:/opt/cloudbeaver/workspace
